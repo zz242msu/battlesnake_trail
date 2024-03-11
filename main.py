@@ -64,14 +64,31 @@ def move(game_state: typing.Dict) -> typing.Dict:
         is_move_safe["up"] = False
 
     # TODO: Step 1 - Prevent your Battlesnake from moving out of bounds
-    # board_width = game_state['board']['width']
-    # board_height = game_state['board']['height']
+    board_width = game_state['board']['width']
+    board_height = game_state['board']['height']
+
+    # Check for out-of-bounds moves
+    if my_head["x"] == 0: is_move_safe["left"] = False
+    if my_head["x"] == board_width - 1: is_move_safe["right"] = False
+    if my_head["y"] == 0: is_move_safe["down"] = False
+    if my_head["y"] == board_height - 1: is_move_safe["up"] = False
 
     # TODO: Step 2 - Prevent your Battlesnake from colliding with itself
-    # my_body = game_state['you']['body']
+    my_body = game_state['you']['body']
+    for move, isSafe in is_move_safe.items():
+        if not isSafe: continue  # Skip already unsafe moves
+        future_position = get_future_position(my_head, move)
+        if future_position in my_body:
+            is_move_safe[move] = False
 
     # TODO: Step 3 - Prevent your Battlesnake from colliding with other Battlesnakes
-    # opponents = game_state['board']['snakes']
+    opponents = game_state['board']['snakes']
+    for move, isSafe in is_move_safe.items():
+        if not isSafe: continue  # Skip already unsafe moves
+        future_position = get_future_position(my_head, move)
+        for snake in opponents:
+            if future_position in snake['body']:
+                is_move_safe[move] = False
 
     # Are there any safe moves left?
     safe_moves = []
@@ -92,6 +109,13 @@ def move(game_state: typing.Dict) -> typing.Dict:
     print(f"MOVE {game_state['turn']}: {next_move}")
     return {"move": next_move}
 
+def get_future_position(current_position, direction):
+    future_position = current_position.copy()
+    if direction == "up": future_position["y"] += 1
+    elif direction == "down": future_position["y"] -= 1
+    elif direction == "left": future_position["x"] -= 1
+    elif direction == "right": future_position["x"] += 1
+    return future_position
 
 # Start server when `python main.py` is run
 if __name__ == "__main__":
