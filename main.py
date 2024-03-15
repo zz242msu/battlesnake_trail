@@ -40,6 +40,37 @@ def end(game_state: typing.Dict):
     print("GAME OVER\n")
 
 
+
+def move_towards_food(game_state: typing.Dict, safe_moves: list, my_head: typing.Dict) -> str:
+    """
+    Move towards the closest food if possible, considering only safe moves.
+    """
+    food_positions = game_state['board']['food']
+    closest_food = None
+    min_distance = float('inf')
+
+    # Find the closest piece of food
+    for food in food_positions:
+        distance = abs(food['x'] - my_head['x']) + abs(food['y'] - my_head['y'])
+        if distance < min_distance:
+            min_distance = distance
+            closest_food = food
+
+    if closest_food:
+        # Determine direction towards closest food
+        if closest_food['x'] < my_head['x'] and "left" in safe_moves:
+            return "left"
+        elif closest_food['x'] > my_head['x'] and "right" in safe_moves:
+            return "right"
+        elif closest_food['y'] < my_head['y'] and "down" in safe_moves:
+            return "down"
+        elif closest_food['y'] > my_head['y'] and "up" in safe_moves:
+            return "up"
+
+    # If moving directly towards food is not safe, return None
+    return None
+
+
 # move is called on every turn and returns your next move
 # Valid moves are "up", "down", "left", or "right"
 # See https://docs.battlesnake.com/api/example-move for available data
@@ -105,6 +136,19 @@ def move(game_state: typing.Dict) -> typing.Dict:
 
     # TODO: Step 4 - Move towards food instead of random, to regain health and survive longer
     # food = game_state['board']['food']
+
+    # print(f"MOVE {game_state['turn']}: {next_move}")
+    # return {"move": next_move}
+    if len(safe_moves) > 0:
+        food_move = move_towards_food(game_state, safe_moves, my_head)
+        if food_move:
+            next_move = food_move
+        else:
+            # If there is no safe move towards food, choose a random safe move
+            next_move = random.choice(safe_moves)
+    else:
+        print(f"MOVE {game_state['turn']}: No safe moves detected! Moving down")
+        next_move = "down"
 
     print(f"MOVE {game_state['turn']}: {next_move}")
     return {"move": next_move}
