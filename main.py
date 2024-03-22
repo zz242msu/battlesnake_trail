@@ -39,8 +39,6 @@ def start(game_state: typing.Dict):
 def end(game_state: typing.Dict):
     print("GAME OVER\n")
 
-
-
 def move_towards_food(game_state: typing.Dict, safe_moves: list, my_head: typing.Dict) -> str:
     """
     Move towards the closest food if possible, considering only safe moves.
